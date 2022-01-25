@@ -341,22 +341,7 @@ public class DestinationView implements DestinationViewMBean {
 
     @Override
     public String sendTextMessageWithProperties(String properties) throws Exception {
-        Map<String, String> props = parseProps(properties, ",");
-        return sendTextMessage(props, props.remove("body"), props.remove("username"), props.remove("password"));
-    }
-
-    @Override
-    public String sendTextMessageWithProperties(String properties, String delimiter) throws Exception {
-        if (delimiter == null || delimiter.isEmpty()) {
-            return sendTextMessageWithProperties(properties);
-        } else {
-            Map<String, String> props = parseProps(properties, delimiter);
-            return sendTextMessage(props, props.remove("body"), props.remove("username"), props.remove("password"));
-        }
-    }
-
-    private Map<String, String> parseProps(String properties, String delimiter) {
-        String[] kvs = properties.split(delimiter);
+        String[] kvs = properties.split(",");
         Map<String, String> props = new HashMap<String, String>();
         for (String kv : kvs) {
             String[] it = kv.split("=");
@@ -364,7 +349,7 @@ public class DestinationView implements DestinationViewMBean {
                 props.put(it[0],it[1]);
             }
         }
-        return props;
+        return sendTextMessage(props, props.remove("body"), props.remove("username"), props.remove("password"));
     }
 
     @Override

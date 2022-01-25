@@ -137,6 +137,8 @@ public class Queue extends BaseDestination implements Task, UsageListener, Index
     private final AtomicLong pendingWakeups = new AtomicLong();
     private boolean allConsumersExclusiveByDefault = false;
 
+    private final List<QueueListener> listeners = new ArrayList<>();
+
     private volatile boolean resetNeeded;
 
     private final Runnable sendMessagesWaitingForSpaceTask = new Runnable() {
@@ -1903,6 +1905,13 @@ public class Queue extends BaseDestination implements Task, UsageListener, Index
                 pagedInMessagesLock.writeLock().unlock();
             }
         }
+        fireDropMessage(reference);
+    }
+
+    private void fireDropMessage(QueueMessageReference reference) {
+        for (QueueListener listener : listeners) {
+            listener.onDropMessage(reference);
+        }
     }
 
     public void messageExpired(ConnectionContext context, MessageReference reference) {
@@ -2468,5 +2477,13 @@ public class Queue extends BaseDestination implements Task, UsageListener, Index
             }
         }
         return result;
+    }
+
+    public void addListener(QueueListener listener) {
+        listeners.add(listener);
+    }
+
+    public List<QueueListener> getListeners() {
+        return List.copyOf(listeners);
     }
 }
